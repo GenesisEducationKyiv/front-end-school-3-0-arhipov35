@@ -4,13 +4,14 @@ import {
   useUpdateTrackMutation,
   useGetGenresQuery,
 } from "../../api/apiSlice";
-import TagsInput from "../../../../shared/components/Form/TagsInput";
-import Loader from "../../../../shared/components/Loader";
+import TagsInput from "@/shared/components/Form/TagsInput";
+import Loader from "@/shared/components/Loader";
 import { Track } from "../../../../types/track";
 import "../../../../styles/track-form.scss";
 import { ResultAsync } from "neverthrow";
 import { validateForm, FormData, FormErrors } from "../../utils/validateForm";
 import { toError } from "../../utils/toError";
+
 
 interface TrackFormProps {
   track?: Track;
@@ -61,7 +62,6 @@ const TrackForm = ({ track, onClose }: TrackFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    
     const validationResult = validateForm(formData);
     if (validationResult.isErr()) {
       setErrors(validationResult.error);
@@ -70,42 +70,18 @@ const TrackForm = ({ track, onClose }: TrackFormProps) => {
 
     const validatedData = validationResult.value;
 
-    if (track) {
-      const updatePromise = updateTrack({
-        id: track.id,
-        ...validatedData,
-      }).unwrap();
+    const actionPromise = track
+      ? updateTrack({ id: track.id, ...validatedData }).unwrap()
+      : createTrack(validatedData).unwrap();
 
-      const updateResult = await ResultAsync.fromPromise(
-        updatePromise,
-        toError
-      );
+    const result = await ResultAsync.fromPromise(actionPromise, toError);
 
-      updateResult.match(
-        () => {
-          onClose();
-        },
-        (error: Error) => {
-          console.error("Failed to update track:", error);
-        }
-      );
-    } else {
-      const createPromise = createTrack(validatedData).unwrap();
-
-      const createResult = await ResultAsync.fromPromise(
-        createPromise,
-        toError
-      );
-
-      createResult.match(
-        () => {
-          onClose();
-        },
-        (error: Error) => {
-          console.error("Failed to create track:", error);
-        }
-      );
-    }
+    result.match(
+      () => onClose(),
+      (error: Error) => {
+        console.error(`Failed to ${track ? "update" : "create"} track:`, error);
+      }
+    );
   };
 
   if (genresLoading) {
