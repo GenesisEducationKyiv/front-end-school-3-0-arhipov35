@@ -1,0 +1,35 @@
+import { Option, O } from '@mobily/ts-belt';
+import { TrackFilters, TrackFiltersSchema } from '../../../types/track';
+
+
+export function filtersFromQueryString(query: string): Option<TrackFilters> {
+  const cleanQuery = query.startsWith('?') ? query.slice(1) : query;
+  const params = new URLSearchParams(cleanQuery);
+  const raw: Partial<Record<keyof TrackFilters, string>> = {};
+  params.forEach((value, key) => {
+    raw[key as keyof TrackFilters] = value;
+  });
+  const parsed: Partial<TrackFilters> = {
+    ...raw,
+    page: raw.page ? Number(raw.page) : undefined,
+    limit: raw.limit ? Number(raw.limit) : undefined,
+    sort: raw.sort as TrackFilters['sort'] | undefined,
+    order: raw.order as TrackFilters['order'] | undefined,
+    search: raw.search,
+    genre: raw.genre,
+    artist: raw.artist,
+  };
+  const result = TrackFiltersSchema.safeParse(parsed);
+  return result.success ? O.Some(result.data) : O.None;
+}
+
+
+export function filtersToQueryString(filters: TrackFilters): string {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      params.set(key, String(value));
+    }
+  });
+  return params.toString();
+}

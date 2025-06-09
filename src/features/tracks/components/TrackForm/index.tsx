@@ -67,7 +67,7 @@ const TrackForm = ({ track, onClose }: TrackFormProps) => {
       setErrors(validationResult.error);
       return;
     }
-
+    //Instead of ts-belt’s Either, I used neverthrow.Result because they serve the same purpose for demonstrating monads.
     const validatedData = validationResult.value;
 
     const actionPromise = track
