@@ -1,10 +1,9 @@
 import { Option, O } from '@mobily/ts-belt';
-import { TrackFilters, TrackFiltersSchema } from '../../../types/track';
+import { TrackFilters, TrackFiltersSchema } from '@/types/track';
 
 
 export function filtersFromQueryString(query: string): Option<TrackFilters> {
-  const cleanQuery = query.startsWith('?') ? query.slice(1) : query;
-  const params = new URLSearchParams(cleanQuery);
+  const params = new URLSearchParams(query);
   const raw: Partial<Record<keyof TrackFilters, string>> = {};
   params.forEach((value, key) => {
     raw[key as keyof TrackFilters] = value;

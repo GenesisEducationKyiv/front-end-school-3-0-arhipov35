@@ -1,8 +1,9 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { O } from '@mobily/ts-belt';
-import { filtersFromQueryString, filtersToQueryString } from '../utils/urlFilters';
-import { TrackFilters } from '../../../types/track';
-import { useGetTracksQuery, useGetGenresQuery } from '../api/apiSlice';
+import { filtersFromQueryString, filtersToQueryString } from '@/features/tracks/utils/urlFilters';
+import { TrackFilters } from '@/types/track';
+import { useGetTracksQuery, useGetGenresQuery } from '@/features/tracks/api/apiSlice';
+import { useSearchParams } from 'react-router-dom';
 
 export function useTrackFilters(initialFilters: TrackFilters = {
   page: 1,
@@ -11,8 +12,9 @@ export function useTrackFilters(initialFilters: TrackFilters = {
   order: 'desc'
 }) {
 
+  const [searchParams, setSearchParams] = useSearchParams();
   const getFiltersFromUrl = (): TrackFilters => {
-    const opt = filtersFromQueryString(window.location.search);
+    const opt = filtersFromQueryString(searchParams.toString());
     return O.getWithDefault(opt, initialFilters);
   };
 
@@ -33,9 +35,8 @@ export function useTrackFilters(initialFilters: TrackFilters = {
 
   useEffect(() => {
     const query = filtersToQueryString(filters);
-    const url = `${window.location.pathname}${query ? `?${query}` : ''}`;
-    window.history.replaceState({}, '', url);
-  }, [filters]);
+    setSearchParams(query ? query : {})
+  }, [filters, setSearchParams]);
   
   const handleSortChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const [sort, order] = e.target.value.split('-');
