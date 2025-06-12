@@ -1,4 +1,4 @@
-import { Option, O } from '@mobily/ts-belt';
+import { Option, O, pipe } from '@mobily/ts-belt';
 import { TrackFilters, TrackFiltersSchema } from '@/types/track';
 
 
@@ -25,10 +25,15 @@ export function filtersFromQueryString(query: string): Option<TrackFilters> {
 
 export function filtersToQueryString(filters: TrackFilters): string {
   const params = new URLSearchParams();
+
   Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
-      params.set(key, String(value));
-    }
+    pipe(
+      value as string | number | undefined,
+      O.fromNullable,
+      O.filter((v) => v !== ''),
+      O.tap((v) => params.set(key, String(v))) 
+    );
   });
+
   return params.toString();
 }
