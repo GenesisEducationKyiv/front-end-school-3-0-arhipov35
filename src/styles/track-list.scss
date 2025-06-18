@@ -1,0 +1,57 @@
+.track-list-container {
+  padding: 1.5rem 0;
+  
+  .empty-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 3rem 1.5rem;
+    text-align: center;
+    
+    p {
+      font-size: 1.125rem;
+      color: #6c757d;
+      margin-bottom: 0;
+    }
+  }
+  
+  .track-cover-thumbnail {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 0.25rem;
+  }
+  
+  .genre-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  
+  .genre-tag {
+    display: inline-block;
+    background-color: #e9ecef;
+    border-radius: 0.25rem;
+    padding: 0.125rem 0.375rem;
+    font-size: 0.75rem;
+    color: #495057;
+  }
+  
+  .delete-confirmation {
+    p {
+      margin-bottom: 0.5rem;
+    }
+  }
+  
+  .pagination {
+    margin-bottom: 0;
+  }
+  
+  .filters-container {
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1rem;
+  }
+}
