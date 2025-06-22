@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import "../../../styles/tags-input.scss";
+import "@/styles/tags-input.scss";
 
 interface TagsInputProps {
   tags: string[];
@@ -16,7 +16,8 @@ const TagsInput: React.FC<TagsInputProps> = ({
   onChange,
   placeholder = 'Add a tag...',
   disabled = false,
-  error
+  error,
+  ...divProps 
 }) => {
   const [input, setInput] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -24,7 +25,6 @@ const TagsInput: React.FC<TagsInputProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Handle filtering of suggestions when input changes
   useEffect(() => {
     const filtered = suggestions.filter(
       suggestion => 
@@ -35,7 +35,6 @@ const TagsInput: React.FC<TagsInputProps> = ({
     setIsDropdownOpen(input.length > 0 && filtered.length > 0);
   }, [input, suggestions, tags]);
 
-  // Handle click outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -87,7 +86,10 @@ const TagsInput: React.FC<TagsInputProps> = ({
   };
 
   return (
-    <div className={`tags-input-container ${error ? 'is-invalid' : ''}`}>
+    <div
+      className={`tags-input-container ${error ? 'is-invalid' : ''}`}
+      {...divProps}  
+    >
       <div className="tags-input-wrapper">
         <div className="tags-list">
           {tags.map((tag, index) => (
@@ -133,5 +135,6 @@ const TagsInput: React.FC<TagsInputProps> = ({
     </div>
   );
 };
+
 
 export default TagsInput;
