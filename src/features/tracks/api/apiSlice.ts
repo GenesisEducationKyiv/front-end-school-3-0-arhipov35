@@ -1,133 +1,489 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { 
-  CreateTrackRequest, 
-  DeleteMultipleResponse, 
-  Track, 
-  TrackFilters, 
-  TrackListResponse, 
-  UpdateTrackRequest 
-} from '@/types/track';
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { graphqlRequestBaseQuery } from "@rtk-query/graphql-request-base-query";
+import {
+  CreateTrackRequest,
+  DeleteMultipleResponse,
+  Track,
+  TrackFilters,
+  TrackListResponse,
+  UpdateTrackRequest,
+} from "@/types/track";
+import {
+  TracksResponse,
+  TrackResponse,
+  CreateTrackResponse,
+  UpdateTrackResponse,
+  DeleteTrackResponse,
+  UploadTrackFileResponse,
+  DeleteTrackFileResponse,
+  DeleteMultipleTracksResponse,
+  GenresResponse,
+} from "./graphqlTypes";
 
-//Refactor your app using one of the following state managers: Redux toolkit(RTK Query)
-const buildQueryString = (filters?: TrackFilters): string => {
-  if (!filters) return '';
-  
-  const params = new URLSearchParams();
-  
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
-      params.append(key, String(value));
+export const uploadFile = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    console.log("Uploading file:", file.name);
+
+    const response = await fetch("http://localhost:4000/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Upload response not OK:", response.status, errorText);
+      try {
+        const errorData = JSON.parse(errorText) as { message?: string };
+        throw new Error(
+          errorData.message ?? `Failed to upload file: ${response.status}`
+        );
+      } catch (_e) {
+        throw new Error(
+          `Failed to upload file: ${response.status} - ${errorText}`
+        );
+      }
     }
-  });
-  
-  const queryString = params.toString();
-  return queryString ? `?${queryString}` : '';
+
+    const data = (await response.json()) as { filename?: string };
+    console.log("Upload response data:", data);
+
+    if (!data.filename) {
+      throw new Error("No filename in response");
+    }
+
+    return data.filename;
+  } catch (error: unknown) {
+    console.error("Error uploading file:", error);
+    throw error;
+  }
+};
+
+export const uploadTrackFileComplete = async (
+  id: string,
+  file: File
+): Promise<{ success: boolean; track: Track; message: string }> => {
+  try {
+    const filename = await uploadFile(file);
+
+    if (!filename) {
+      throw new Error("No filename returned from upload");
+    }
+
+    console.log("File uploaded, filename:", filename);
+
+    const response = await fetch("http://localhost:4000/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `
+          mutation UploadTrackFile($id: ID!, $filename: String!) {
+            uploadTrackFile(id: $id, filename: $filename) {
+              success
+              message
+              track {
+                id
+                title
+                artist
+                album
+                genres
+                slug
+                coverImage
+                audioFile
+                createdAt
+                updatedAt
+              }
+            }
+          }
+        `,
+        variables: {
+          id: id,
+          filename: filename,
+        },
+      }),
+    });
+
+    const result = (await response.json()) as {
+      errors?: Array<{ message?: string }>;
+      data: {
+        uploadTrackFile: { success: boolean; track: Track; message: string };
+      };
+    };
+
+    if (result.errors) {
+      console.error("GraphQL errors:", result.errors);
+      throw new Error(result.errors[0]?.message ?? "GraphQL error");
+    }
+
+    return result.data.uploadTrackFile as {
+      success: boolean;
+      track: Track;
+      message: string;
+    };
+  } catch (error: unknown) {
+    console.error("Error in uploadTrackFileComplete:", error);
+    throw error;
+  }
 };
 
 export const apiSlice = createApi({
-  reducerPath: 'api',
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:3000' }),
-  tagTypes: ['Track', 'Genre'],
+  reducerPath: "api",
+  baseQuery: graphqlRequestBaseQuery({
+    url: "http://localhost:4000/graphql",
+  }),
+  tagTypes: ["Track", "Genre"],
   endpoints: (builder) => ({
-    checkHealth: builder.query<{ status: string }, void>({
-      query: () => '/health',
-    }),
-    
     getTracks: builder.query<TrackListResponse, TrackFilters | undefined>({
       query: (filters) => ({
-        url: `/api/tracks${buildQueryString(filters)}`,
-        method: 'GET',
+        document: `
+          query GetTracks($page: Int, $limit: Int, $search: String, $genre: String, $artist: String, $sort: String, $order: String) {
+            tracks(page: $page, limit: $limit, search: $search, genre: $genre, artist: $artist, sort: $sort, order: $order) {
+              data {
+                id
+                title
+                artist
+                album
+                genres
+                slug
+                coverImage
+                audioFile
+                createdAt
+                updatedAt
+              }
+              meta {
+                total
+                page
+                limit
+                totalPages
+              }
+            }
+          }
+        `,
+        variables: filters
+          ? {
+              page: filters.page,
+              limit: filters.limit,
+              search: filters.search,
+              genre: filters.genre,
+              artist: filters.artist,
+              sort: filters.sort,
+              order: filters.order,
+            }
+          : {},
       }),
-      providesTags: (result) => 
-        result 
+      transformResponse: (response: TracksResponse) => response.tracks,
+      providesTags: (result) =>
+        result
           ? [
-              ...result.data.map(({ id }) => ({ type: 'Track' as const, id })),
-              { type: 'Track', id: 'LIST' }
+              ...result.data.map(({ id }: { id: string }) => ({
+                type: "Track" as const,
+                id,
+              })),
+              { type: "Track", id: "LIST" },
             ]
-          : [{ type: 'Track', id: 'LIST' }],
+          : [{ type: "Track", id: "LIST" }],
     }),
-    
+
     getTrackBySlug: builder.query<Track, string>({
-      query: (slug) => `/api/tracks/${slug}`,
-      providesTags: (_result, _error, slug) => [{ type: 'Track', id: slug }],
+      query: (slug) => ({
+        document: `
+          query GetTrack($slug: String!) {
+            track(slug: $slug) {
+              id
+              title
+              artist
+              album
+              genres
+              slug
+              coverImage
+              audioFile
+              createdAt
+              updatedAt
+            }
+          }
+        `,
+        variables: { slug },
+      }),
+      transformResponse: (response: TrackResponse) => response.track,
+      providesTags: (_result, _error, slug) => [{ type: "Track", id: slug }],
     }),
-    
+
     createTrack: builder.mutation<Track, CreateTrackRequest>({
       query: (trackData) => ({
-        url: '/api/tracks',
-        method: 'POST',
-        body: trackData,
+        document: `
+          mutation CreateTrack($input: CreateTrackInput!) {
+            createTrack(input: $input) {
+              id
+              title
+              artist
+              album
+              genres
+              slug
+              coverImage
+              audioFile
+              createdAt
+              updatedAt
+            }
+          }
+        `,
+        variables: { input: trackData },
       }),
-      invalidatesTags: [{ type: 'Track', id: 'LIST' }],
+      transformResponse: (response: CreateTrackResponse) =>
+        response.createTrack,
+      invalidatesTags: [{ type: "Track", id: "LIST" }],
     }),
-    
+
     updateTrack: builder.mutation<Track, UpdateTrackRequest>({
       query: ({ id, ...trackData }) => ({
-        url: `/api/tracks/${id}`,
-        method: 'PUT',
-        body: trackData,
+        document: `
+          mutation UpdateTrack($id: ID!, $input: UpdateTrackInput!) {
+            updateTrack(id: $id, input: $input) {
+              id
+              title
+              artist
+              album
+              genres
+              slug
+              coverImage
+              audioFile
+              createdAt
+              updatedAt
+            }
+          }
+        `,
+        variables: { id, input: trackData },
       }),
+      transformResponse: (response: UpdateTrackResponse) =>
+        response.updateTrack,
       invalidatesTags: (_result, _error, { id }) => [
-        { type: 'Track', id },
-        { type: 'Track', id: 'LIST' }
+        { type: "Track", id },
+        { type: "Track", id: "LIST" },
       ],
     }),
-    
-    deleteTrack: builder.mutation<void, string>({
+
+    deleteTrack: builder.mutation<boolean, string>({
       query: (id) => ({
-        url: `/api/tracks/${id}`,
-        method: 'DELETE',
+        document: `
+          mutation DeleteTrack($id: ID!) {
+            deleteTrack(id: $id)
+          }
+        `,
+        variables: { id },
       }),
-      invalidatesTags: [{ type: 'Track', id: 'LIST' }],
+      transformResponse: (response: DeleteTrackResponse) =>
+        response.deleteTrack,
+      invalidatesTags: [{ type: "Track", id: "LIST" }],
     }),
-    
-    uploadTrackFile: builder.mutation<Track, { id: string; file: File }>({
-      query: ({ id, file }) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        
-        return {
-          url: `/api/tracks/${id}/upload`,
-          method: 'POST',
-          body: formData,
-          formData: true,
-        };
+
+    uploadTrackFile: builder.mutation<
+      { success: boolean; track: Track; message: string },
+      { id: string; file: File }
+    >({
+      async queryFn({ id, file }, _queryApi, _extraOptions, fetchWithBQ) {
+        try {
+          console.log("RTK Query uploadTrackFile called with:", {
+            id,
+            fileName: file.name,
+          });
+
+          const formData = new FormData();
+          formData.append("file", file);
+
+          const uploadResponse = await fetch(
+            `http://localhost:4000/api/tracks/${id}/upload`,
+            {
+              method: "POST",
+              body: formData,
+            }
+          );
+
+          if (!uploadResponse.ok) {
+            const errorText = await uploadResponse.text();
+            console.error(
+              "Upload response not OK:",
+              uploadResponse.status,
+              errorText
+            );
+            try {
+              const errorData = JSON.parse(errorText) as { message?: string };
+              throw new Error(
+                errorData.message ??
+                  `Failed to upload file: ${uploadResponse.status}`
+              );
+            } catch (_e) {
+              throw new Error(
+                `Failed to upload file: ${uploadResponse.status} - ${errorText}`
+              );
+            }
+          }
+
+          interface UploadResponse {
+            success?: boolean;
+            track?: Track;
+            filename?: string;
+            message?: string;
+          }
+
+          interface TrackFileUploadResult {
+            success: boolean;
+            track: Track;
+            message: string;
+          }
+
+          const uploadData = (await uploadResponse.json()) as UploadResponse;
+          console.log("Upload response data:", uploadData);
+
+          if (uploadData.success && uploadData.track?.audioFile) {
+            const filename = uploadData.track.audioFile;
+            console.log("Using audioFile from response:", filename);
+            const result: TrackFileUploadResult = {
+              success: uploadData.success ?? false,
+              track: uploadData.track as Track,
+              message: uploadData.message ?? "",
+            };
+            return { data: result };
+          } else if (uploadData.filename) {
+            const filename = uploadData.filename;
+            console.log("Using filename from response:", filename);
+
+            type GraphQLQuery = {
+              document: string;
+              variables: Record<string, unknown>;
+            };
+
+            const graphqlQuery: GraphQLQuery = {
+              document: `
+                mutation UploadTrackFile($id: ID!, $filename: String!) {
+                  uploadTrackFile(id: $id, filename: $filename) {
+                    success
+                    message
+                    track {
+                      id
+                      title
+                      artist
+                      album
+                      genres
+                      slug
+                      coverImage
+                      audioFile
+                      createdAt
+                      updatedAt
+                    }
+                  }
+                }
+              `,
+              variables: { id, filename },
+            };
+
+            interface QueryResult<T> {
+              data?: T;
+              error?: {
+                status: string;
+                error: string;
+              };
+            }
+
+            const result = (await fetchWithBQ(
+              graphqlQuery
+            )) as QueryResult<UploadTrackFileResponse>;
+
+            if (result.error) {
+              return { error: result.error };
+            }
+
+            const responseData = result.data as UploadTrackFileResponse;
+
+            if (!responseData?.uploadTrackFile) {
+              return {
+                error: {
+                  status: "CUSTOM_ERROR",
+                  error: "Invalid response from server",
+                },
+              };
+            }
+
+            const uploadResult: TrackFileUploadResult =
+              responseData.uploadTrackFile;
+            return { data: uploadResult };
+          } else {
+            console.error("Invalid server response:", uploadData);
+            throw new Error("Invalid server response format");
+          }
+        } catch (error: unknown) {
+          console.error("Error in uploadTrackFile:", error);
+          return { error: { status: "CUSTOM_ERROR", error: String(error) } };
+        }
       },
       invalidatesTags: (_result, _error, { id }) => [
-        { type: 'Track', id },
-        { type: 'Track', id: 'LIST' }
+        { type: "Track", id },
+        { type: "Track", id: "LIST" },
       ],
     }),
-    
+
     deleteTrackFile: builder.mutation<Track, string>({
       query: (id) => ({
-        url: `/api/tracks/${id}/file`,
-        method: 'DELETE',
+        document: `
+          mutation DeleteTrackFile($id: ID!) {
+            deleteTrackFile(id: $id) {
+              id
+              title
+              artist
+              album
+              genres
+              slug
+              coverImage
+              audioFile
+              createdAt
+              updatedAt
+            }
+          }
+        `,
+        variables: { id },
       }),
+      transformResponse: (response: DeleteTrackFileResponse) =>
+        response.deleteTrackFile,
       invalidatesTags: (_result, _error, id) => [
-        { type: 'Track', id },
-        { type: 'Track', id: 'LIST' }
+        { type: "Track", id },
+        { type: "Track", id: "LIST" },
       ],
     }),
-    
+
     deleteMultipleTracks: builder.mutation<DeleteMultipleResponse, string[]>({
       query: (ids) => ({
-        url: '/api/tracks/delete',
-        method: 'POST',
-        body: { ids },
+        document: `
+          mutation DeleteTracks($ids: [ID!]!) {
+            deleteTracks(ids: $ids) {
+              success
+              failed
+            }
+          }
+        `,
+        variables: { ids },
       }),
-      invalidatesTags: [{ type: 'Track', id: 'LIST' }],
+      transformResponse: (response: DeleteMultipleTracksResponse) =>
+        response.deleteTracks,
+      invalidatesTags: [{ type: "Track", id: "LIST" }],
     }),
-    
+
     getGenres: builder.query<string[], void>({
-      query: () => '/api/genres',
-      providesTags: [{ type: 'Genre', id: 'LIST' }],
+      query: () => ({
+        document: `
+          query GetGenres {
+            genres
+          }
+        `,
+      }),
+      transformResponse: (response: GenresResponse) => response.genres,
+      providesTags: [{ type: "Genre", id: "LIST" }],
     }),
   }),
 });
 
 export const {
-  useCheckHealthQuery,
   useGetTracksQuery,
   useGetTrackBySlugQuery,
   useCreateTrackMutation,

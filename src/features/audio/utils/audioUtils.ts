@@ -2,7 +2,6 @@
  * Utility functions for handling audio files and URLs
  */
 
-
 export const formatAudioUrl = (audioSrc: string): string => {
   if (!audioSrc) return '';
   
@@ -10,8 +9,8 @@ export const formatAudioUrl = (audioSrc: string): string => {
     return audioSrc;
   }
   
-  const baseUrl = 'http://localhost:3000';
-  const audioEndpoint = '/api/files';
+  const baseUrl = 'http://localhost:4000';
+  const audioEndpoint = '/files';
   
   let formattedUrl;
   
