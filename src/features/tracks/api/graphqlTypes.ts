@@ -4,6 +4,32 @@ import {
   DeleteMultipleResponse,
 } from "@/types/track";
 
+export interface UploadResponse {
+  success?: boolean;
+  track?: Track;
+  filename?: string;
+  message?: string;
+}
+
+export interface TrackFileUploadResult {
+  success: boolean;
+  track: Track;
+  message: string;
+}
+
+export type GraphQLQuery = {
+  document: string;
+  variables: Record<string, unknown>;
+};
+
+export interface QueryResult<T> {
+  data?: T;
+  error?: {
+    status: string;
+    error: string;
+  };
+}
+
 export interface TracksResponse {
   tracks: TrackListResponse;
 }

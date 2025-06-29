@@ -18,6 +18,10 @@ import {
   DeleteTrackFileResponse,
   DeleteMultipleTracksResponse,
   GenresResponse,
+  UploadResponse,
+  TrackFileUploadResult,
+  GraphQLQuery,
+  QueryResult,
 } from "./graphqlTypes";
 
 export const uploadFile = async (file: File): Promise<string> => {
@@ -321,18 +325,7 @@ export const apiSlice = createApi({
             }
           }
 
-          interface UploadResponse {
-            success?: boolean;
-            track?: Track;
-            filename?: string;
-            message?: string;
-          }
-
-          interface TrackFileUploadResult {
-            success: boolean;
-            track: Track;
-            message: string;
-          }
+         
 
           const uploadData = (await uploadResponse.json()) as UploadResponse;
           console.log("Upload response data:", uploadData);
@@ -350,10 +343,7 @@ export const apiSlice = createApi({
             const filename = uploadData.filename;
             console.log("Using filename from response:", filename);
 
-            type GraphQLQuery = {
-              document: string;
-              variables: Record<string, unknown>;
-            };
+            
 
             const graphqlQuery: GraphQLQuery = {
               document: `
@@ -379,13 +369,7 @@ export const apiSlice = createApi({
               variables: { id, filename },
             };
 
-            interface QueryResult<T> {
-              data?: T;
-              error?: {
-                status: string;
-                error: string;
-              };
-            }
+            
 
             const result = (await fetchWithBQ(
               graphqlQuery
