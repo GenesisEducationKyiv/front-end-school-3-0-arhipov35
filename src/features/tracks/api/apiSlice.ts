@@ -216,78 +216,62 @@ export const apiSlice = createApi({
             }
           }
 
-         
-
           const uploadData = (await uploadResponse.json()) as UploadResponse;
           console.log("Upload response data:", uploadData);
 
-          if (uploadData.success && uploadData.track?.audioFile) {
-            const filename = uploadData.track.audioFile;
-            console.log("Using audioFile from response:", filename);
-            const result: TrackFileUploadResult = {
-              success: uploadData.success ?? false,
-              track: uploadData.track as Track,
-              message: uploadData.message ?? "",
-            };
-            return { data: result };
-          } else if (uploadData.filename) {
-            const filename = uploadData.filename;
-            console.log("Using filename from response:", filename);
+          const filename = uploadData.filename || (uploadData.track?.audioFile || "");
 
-            
+          if (!filename) {
+            throw new Error("No filename in response");
+          }
 
-            const graphqlQuery: GraphQLQuery = {
-              document: `
-                mutation UploadTrackFile($id: ID!, $filename: String!) {
-                  uploadTrackFile(id: $id, filename: $filename) {
-                    success
-                    message
-                    track {
-                      id
-                      title
-                      artist
-                      album
-                      genres
-                      slug
-                      coverImage
-                      audioFile
-                      createdAt
-                      updatedAt
-                    }
+          console.log("Using filename for GraphQL request:", filename);
+
+          const graphqlQuery: GraphQLQuery = {
+            document: `
+              mutation UploadTrackFile($id: ID!, $filename: String!) {
+                uploadTrackFile(id: $id, filename: $filename) {
+                  success
+                  message
+                  track {
+                    id
+                    title
+                    artist
+                    album
+                    genres
+                    slug
+                    coverImage
+                    audioFile
+                    createdAt
+                    updatedAt
                   }
                 }
-              `,
-              variables: { id, filename },
-            };
+              }
+            `,
+            variables: { id, filename },
+          };
 
-            
+          const result = (await fetchWithBQ(
+            graphqlQuery
+          )) as QueryResult<UploadTrackFileResponse>;
 
-            const result = (await fetchWithBQ(
-              graphqlQuery
-            )) as QueryResult<UploadTrackFileResponse>;
-
-            if (result.error) {
-              return { error: result.error };
-            }
-
-            const responseData = result.data as UploadTrackFileResponse;
-
-            if (!responseData?.uploadTrackFile) {
-              return {
-                error: {
-                  status: "CUSTOM_ERROR",
-                  error: "Invalid response from server",
-                },
-              };
-            }
-
-            const uploadResult: TrackFileUploadResult =
-              responseData.uploadTrackFile;
-            return { data: uploadResult };
-          } else {
-            console.error("Invalid server response:", uploadData);
-            throw new Error("Invalid server response format");
+          if (result.error) {
+            return { error: result.error };
           }
+
+          const responseData = result.data as UploadTrackFileResponse;
+
+          if (!responseData?.uploadTrackFile) {
+            return {
+              error: {
+                status: "CUSTOM_ERROR",
+                error: "Invalid response from server",
+              },
+            };
+          }
+
+          const uploadResult: TrackFileUploadResult = responseData.uploadTrackFile;
+          return { data: uploadResult };
         } catch (error: unknown) {
           console.error("Error in uploadTrackFile:", error);
           return { error: { status: "CUSTOM_ERROR", error: String(error) } };
