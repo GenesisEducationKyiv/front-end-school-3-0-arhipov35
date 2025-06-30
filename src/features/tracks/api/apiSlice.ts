@@ -180,10 +180,6 @@ export const apiSlice = createApi({
     >({
       async queryFn({ id, file }, _queryApi, _extraOptions, fetchWithBQ) {
         try {
-          console.log("RTK Query uploadTrackFile called with:", {
-            id,
-            fileName: file.name,
-          });
 
           const formData = new FormData();
           formData.append("file", file);
@@ -198,11 +194,6 @@ export const apiSlice = createApi({
 
           if (!uploadResponse.ok) {
             const errorText = await uploadResponse.text();
-            console.error(
-              "Upload response not OK:",
-              uploadResponse.status,
-              errorText
-            );
             try {
               const errorData = JSON.parse(errorText) as { message?: string };
               throw new Error(
@@ -217,7 +208,6 @@ export const apiSlice = createApi({
           }
 
           const uploadData = (await uploadResponse.json()) as UploadResponse;
-          console.log("Upload response data:", uploadData);
 
           const filename = uploadData.filename || (uploadData.track?.audioFile || "");
 
@@ -225,7 +215,6 @@ export const apiSlice = createApi({
             throw new Error("No filename in response");
           }
 
-          console.log("Using filename for GraphQL request:", filename);
 
           const graphqlQuery: GraphQLQuery = {
             document: `
@@ -273,7 +262,6 @@ export const apiSlice = createApi({
           const uploadResult: TrackFileUploadResult = responseData.uploadTrackFile;
           return { data: uploadResult };
         } catch (error: unknown) {
-          console.error("Error in uploadTrackFile:", error);
           return { error: { status: "CUSTOM_ERROR", error: String(error) } };
         }
       },
