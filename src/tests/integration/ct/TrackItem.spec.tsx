@@ -20,7 +20,6 @@ test.describe('TrackItem component', () => {
 
   test('renders track data and buttons, interacts correctly', async ({ mount }) => {
     let editClicked = false;
-    let deleteClicked = false;
     let uploadClicked = false;
     let toggleSelectCalled = false;
 
@@ -31,7 +30,7 @@ test.describe('TrackItem component', () => {
         isSelected={false}
         toggleSelectTrack={() => { toggleSelectCalled = true; }}
         onEditClick={() => { editClicked = true; }}
-        onDeleteClick={() => { deleteClicked = true; }}
+        onDeleteClick={() => { }}
         onUploadClick={() => { uploadClicked = true; }}
         getDefaultCoverImage={() => 'https://placehold.co/60x60?text=Default'}
       />

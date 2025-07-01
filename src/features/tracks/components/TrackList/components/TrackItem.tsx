@@ -1,5 +1,5 @@
-import { Track } from '../../../../../types/track';
-import AudioPlayer from '../../../../audio/components/AudioPlayer';
+import AudioPlayer from '@/features/audio/components/AudioPlayer';
+import { Track } from '@/types/track';
 
 interface TrackItemProps {
   track: Track;
