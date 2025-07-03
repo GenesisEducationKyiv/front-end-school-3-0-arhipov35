@@ -32,3 +32,6 @@ dist-ssr
 # Local env files
 .env
 .env.*
+
+# Generated bundle stats
+stats.html

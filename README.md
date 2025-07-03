@@ -60,7 +60,7 @@ npm run build
 # Then open stats.html in your browser
 ```
 
-### Running Tests
+### Running in Dev environment
 ```bash
 npm run dev
 ```
