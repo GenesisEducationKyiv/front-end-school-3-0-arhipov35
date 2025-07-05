@@ -1,4 +1,4 @@
-import Modal from '../../../../../shared/components/Modal';
+import Modal from '@/shared/components/Modal';
 
 interface BulkDeleteModalProps {
   isOpen: boolean;

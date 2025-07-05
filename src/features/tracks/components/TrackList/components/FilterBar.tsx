@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react';
-import { TrackFilters } from '../../../../../types/track';
+import { TrackFilters } from '@/types/track';
 
 interface FilterBarProps {
   filters: TrackFilters;

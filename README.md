@@ -11,6 +11,27 @@ A modern, feature-rich music application built with React, TypeScript, Redux, an
 - 🎧 Responsive and modern UI (Bootstrap + SASS)
 - 🔄 State management with Redux Toolkit
 - ⚡ Fast development with Vite
+- 🔊 Audio visualization with Web Audio API
+- 📊 GraphQL integration with RTK Query
+
+## Technical Stack
+
+- **Frontend**: React 19 with TypeScript
+- **State Management**: Redux Toolkit with RTK Query
+- **API**: GraphQL
+- **Styling**: Bootstrap 5 + SASS
+- **Routing**: React Router v7
+- **Validation**: Zod
+- **Error Handling**: neverthrow (Railway-Oriented Programming)
+- **Testing**: Vitest and Playwright
+- **Build Tool**: Vite
+
+## Performance Optimizations
+
+- **Code Splitting**: Lazy loading for modal components and routes
+- **Bundle Analysis**: Integrated rollup-plugin-visualizer for bundle size monitoring
+- **Tree Shaking**: Optimized with ES modules and Vite
+- **Source Maps**: Enabled for better debugging experience
 
 ## Getting Started
 
@@ -24,6 +45,22 @@ npm install
 ```
 
 ### Running the App
+```bash
+npm run dev
+```
+
+### Building for Production
+```bash
+npm run build
+```
+
+### Analyzing Bundle Size
+```bash
+npm run build
+# Then open stats.html in your browser
+```
+
+### Running in Dev environment
 ```bash
 npm run dev
 ```

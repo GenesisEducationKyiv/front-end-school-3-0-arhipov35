@@ -1,6 +1,6 @@
-import { Track } from '../../../../../types/track';
+import { Track } from '@/types/track';
 import TrackItem from './TrackItem';
-import '../../../../../styles/track-list.scss';
+import '@/styles/track-list.scss';
 
 interface TrackTableProps {
   tracks: Track[];

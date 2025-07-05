@@ -28,3 +28,10 @@ dist-ssr
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Local env files
+.env
+.env.*
+
+# Generated bundle stats
+stats.html
