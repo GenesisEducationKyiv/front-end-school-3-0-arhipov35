@@ -33,7 +33,7 @@ const AudioVisualization = ({
     if (!loaded || !audioRef.current) return;
 
     try {
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioContext = window.AudioContext ?? window.webkitAudioContext;
       const context = new AudioContext();
 
       const analyzerNode = context.createAnalyser();
@@ -50,14 +50,14 @@ const AudioVisualization = ({
 
       return () => {
         if (context.state !== 'closed') {
-          context.close();
+          void context.close();
         }
         if (animationFrameRef.current) {
           cancelAnimationFrame(animationFrameRef.current);
         }
       };
     } catch (error) {
-
+      console.error('Error setting up audio context:', error);
       return;
     }
   }, [loaded, audioRef]);
@@ -69,7 +69,7 @@ const AudioVisualization = ({
     const canvasCtx = canvas.getContext('2d');
     if (!canvasCtx) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = window.devicePixelRatio ?? 1;
     const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;

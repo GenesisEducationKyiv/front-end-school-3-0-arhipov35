@@ -36,7 +36,7 @@ const FilterBar = ({
           <select 
             className="form-select" 
             onChange={handleSortChange}
-            value={`${filters.sort || 'createdAt'}-${filters.order || 'desc'}`}
+            value={`${filters.sort ?? 'createdAt'}-${filters.order ?? 'desc'}`}
             data-testid="sort-select"
           >
             <option value="createdAt-desc">Newest First</option>
@@ -53,7 +53,7 @@ const FilterBar = ({
           <select 
             className="form-select" 
             onChange={handleGenreFilterChange}
-            value={filters.genre || 'all'}
+            value={filters.genre ?? 'all'}
             data-testid="filter-genre"
             aria-label="Filter tracks by genre"
           >
@@ -67,7 +67,7 @@ const FilterBar = ({
           <select 
             className="form-select" 
             onChange={handleArtistFilterChange}
-            value={filters.artist || 'all'}
+            value={filters.artist ?? 'all'}
             data-testid="filter-artist"
             aria-label="Filter tracks by artist"
           >

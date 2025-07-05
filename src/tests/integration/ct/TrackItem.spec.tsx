@@ -18,7 +18,8 @@ test.describe('TrackItem component', () => {
     updatedAt: '2025-01-01T00:00:00Z',
   };
 
-  test('renders track data and buttons, interacts correctly', async ({ mount }) => {
+  // eslint-disable-next-line @typescript-eslint/unbound-method
+  test('renders track data and buttons, interacts correctly', async function({ mount }) {
     let editClicked = false;
     let uploadClicked = false;
     let toggleSelectCalled = false;
@@ -30,7 +31,7 @@ test.describe('TrackItem component', () => {
         isSelected={false}
         toggleSelectTrack={() => { toggleSelectCalled = true; }}
         onEditClick={() => { editClicked = true; }}
-        onDeleteClick={() => { }}
+        onDeleteClick={() => { /* Not needed in this test */ }}
         onUploadClick={() => { uploadClicked = true; }}
         getDefaultCoverImage={() => 'https://placehold.co/60x60?text=Default'}
       />

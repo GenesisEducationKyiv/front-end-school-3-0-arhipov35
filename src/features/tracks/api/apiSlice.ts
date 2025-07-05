@@ -28,7 +28,7 @@ import {
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: graphqlRequestBaseQuery({
-    url: import.meta.env.VITE_API_URL,
+    url: import.meta.env.VITE_API_URL as string,
   }),
   tagTypes: ["Track", "Genre"],
   endpoints: (builder) => ({
@@ -200,7 +200,7 @@ export const apiSlice = createApi({
                 errorData.message ??
                   `Failed to upload file: ${uploadResponse.status}`
               );
-            } catch (_e) {
+            } catch {
               throw new Error(
                 `Failed to upload file: ${uploadResponse.status} - ${errorText}`
               );
@@ -209,7 +209,7 @@ export const apiSlice = createApi({
 
           const uploadData = (await uploadResponse.json()) as UploadResponse;
 
-          const filename = uploadData.filename || (uploadData.track?.audioFile || "");
+          const filename = uploadData.filename ?? (uploadData.track?.audioFile ?? "");
 
           if (!filename) {
             throw new Error("No filename in response");
@@ -248,7 +248,7 @@ export const apiSlice = createApi({
             return { error: result.error };
           }
 
-          const responseData = result.data as UploadTrackFileResponse;
+          const responseData = result.data!;
 
           if (!responseData?.uploadTrackFile) {
             return {

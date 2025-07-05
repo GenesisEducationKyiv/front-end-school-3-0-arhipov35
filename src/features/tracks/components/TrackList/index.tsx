@@ -69,7 +69,7 @@ const TrackList = () => {
 
   const handleUploadModalClose = useCallback(() => {
     setIsUploadModalOpen(false);
-    refetch();
+    void refetch();
   }, [refetch]);
 
   const handleDelete = useCallback(async () => {
@@ -79,7 +79,7 @@ const TrackList = () => {
 
     try {
       if (data?.data.find((t: Track) => t.id === deleteTrackId)) {
-        refetch();
+        void refetch();
       }
 
       await deleteTrack(deleteTrackId).unwrap();
@@ -87,12 +87,12 @@ const TrackList = () => {
       setDeleteTrackId(null);
 
       addToast('Track deleted successfully', 'success');
-    } catch (error) {
-      refetch();
+    } catch {
+      void refetch();
 
       addToast('Failed to delete track', 'error');
     }
-  }, [deleteTrackId, deleteTrack, data?.data, refetch]);
+  }, [deleteTrackId, deleteTrack, data?.data, refetch, addToast]);
 
   const handleBulkDelete = useCallback(async () => {
     if (selectedTrackIds.length === 0) {
@@ -101,7 +101,7 @@ const TrackList = () => {
 
     try {
       if (data?.data.some((t: Track) => selectedTrackIds.includes(t.id))) {
-        refetch();
+        void refetch();
       }
 
       await deleteMultipleTracks(selectedTrackIds).unwrap();
@@ -110,12 +110,12 @@ const TrackList = () => {
       setIsBulkSelectEnabled(false);
 
       addToast(`Successfully deleted ${selectedTrackIds.length} tracks`, 'success');
-    } catch (error) {
-      refetch();
+    } catch {
+      void refetch();
 
       addToast(`Failed to delete tracks`, 'error');
     }
-  }, [selectedTrackIds, deleteMultipleTracks, data?.data, refetch]);
+  }, [selectedTrackIds, deleteMultipleTracks, data?.data, refetch, addToast]);
 
   const toggleSelectTrack = useCallback((id: string) => {
     setSelectedTrackIds(prev =>
@@ -197,7 +197,7 @@ const TrackList = () => {
       ) : (
         <>
           <TrackTable
-            tracks={data?.data || []}
+            tracks={data?.data ?? []}
             isBulkSelectEnabled={isBulkSelectEnabled}
             selectedTrackIds={selectedTrackIds}
             toggleSelectTrack={toggleSelectTrack}
@@ -256,7 +256,7 @@ const TrackList = () => {
         <DeleteTrackModal
           isOpen={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}
-          onDelete={handleDelete}
+          onDelete={() => void handleDelete()}
           isDeleting={isDeleting}
         />
       </Suspense>
@@ -265,7 +265,7 @@ const TrackList = () => {
         <BulkDeleteModal
           isOpen={isBulkDeleteModalOpen}
           onClose={() => setIsBulkDeleteModalOpen(false)}
-          onDelete={handleBulkDelete}
+          onDelete={() => void handleBulkDelete()}
           isDeleting={isMultipleDeleting}
           selectedCount={selectedTrackIds.length}
         />

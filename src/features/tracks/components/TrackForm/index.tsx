@@ -3,14 +3,14 @@ import {
   useCreateTrackMutation,
   useUpdateTrackMutation,
   useGetGenresQuery,
-} from "../../api/apiSlice";
+} from "@/features/tracks/api/apiSlice";
 import TagsInput from "@/shared/components/Form/TagsInput";
 import Loader from "@/shared/components/Loader";
-import { Track } from "../../../../types/track";
-import "../../../../styles/track-form.scss";
+import { Track } from "@/types/track";
+import "@/styles/track-form.scss";
 import { ResultAsync } from "neverthrow";
-import { validateForm, FormData, FormErrors } from "../../utils/validateForm";
-import { toError } from "../../utils/toError";
+import { validateForm, FormData, FormErrors } from "@/features/tracks/utils/validateForm";
+import { toError } from "@/features/tracks/utils/toError";
 
 
 interface TrackFormProps {
@@ -24,11 +24,11 @@ const TrackForm = ({ track, onClose }: TrackFormProps) => {
   const [updateTrack, { isLoading: isUpdating }] = useUpdateTrackMutation();
 
   const [formData, setFormData] = useState<FormData>({
-    title: track?.title || "",
-    artist: track?.artist || "",
-    album: track?.album || "",
+    title: track?.title ?? "",
+    artist: track?.artist ?? "",
+    album: track?.album ?? "",
     genres: track?.genres ?? [],
-    coverImage: track?.coverImage || "",
+    coverImage: track?.coverImage ?? "",
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const isSubmitting = isCreating || isUpdating;
@@ -90,7 +90,7 @@ const TrackForm = ({ track, onClose }: TrackFormProps) => {
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={(e) => { void handleSubmit(e); }}
       className="track-form"
       data-testid="track-form"
     >
@@ -164,7 +164,7 @@ const TrackForm = ({ track, onClose }: TrackFormProps) => {
         </label>
         <TagsInput
           tags={formData.genres}
-          suggestions={genres || []}
+          suggestions={genres ?? []}
           onChange={handleGenresChange}
           placeholder="Add a genre..."
           disabled={isSubmitting}

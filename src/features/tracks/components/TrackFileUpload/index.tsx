@@ -138,7 +138,7 @@ const TrackFileUpload = ({ track, onClose }: TrackFileUploadProps) => {
 
       clearTimeout(stopSimulation as unknown as number);
 
-      handleUploadSuccess();
+      void handleUploadSuccess();
     } catch (error) {
       setIsUploading(false);
       setUploadProgress(0);
@@ -211,7 +211,7 @@ const TrackFileUpload = ({ track, onClose }: TrackFileUploadProps) => {
           <div className="track-file-upload__file-info">
             <span className="track-file-upload__file-icon">🎵</span>
             <span className="track-file-upload__file-name">
-              {track.audioFile.split('/').pop() || 'audio file'}
+              {track.audioFile.split('/').pop() ?? 'audio file'}
             </span>
           </div>
 
@@ -226,7 +226,7 @@ const TrackFileUpload = ({ track, onClose }: TrackFileUploadProps) => {
             <button
               type="button"
               className="track-file-upload__remove-btn"
-              onClick={handleRemoveFile}
+              onClick={() => void handleRemoveFile()}
               disabled={isLoading}
             >
               Remove
@@ -305,7 +305,7 @@ const TrackFileUpload = ({ track, onClose }: TrackFileUploadProps) => {
           <button
             type="button"
             className="track-file-upload__upload-btn"
-            onClick={handleUpload}
+            onClick={() => void handleUpload()}
             disabled={isLoading}
           >
             {isUploadLoading ? 'Uploading...' : 'Upload'}

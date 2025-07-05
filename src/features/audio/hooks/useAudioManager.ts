@@ -39,8 +39,8 @@ export function useAudioManager() {
         if (mediaCaches.length > 0) {
           await Promise.all(mediaCaches.map(cacheName => window.caches.delete(cacheName)));
         }
-      } catch (error) {
-        
+      } catch {
+        console.warn('Failed to clear media cache');
       }
     }
   }, []);
