@@ -6,8 +6,9 @@ import {
   TrackFilters, 
   TrackListResponse, 
   UpdateTrackRequest 
-} from '../../../types/track';
+} from '@/types/track';
 
+//Refactor your app using one of the following state managers: Redux toolkit(RTK Query)
 const buildQueryString = (filters?: TrackFilters): string => {
   if (!filters) return '';
   
