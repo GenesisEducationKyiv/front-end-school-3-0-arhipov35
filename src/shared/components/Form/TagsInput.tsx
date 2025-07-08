@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import "@/styles/tags-input.scss";
 
 interface TagsInputProps {
@@ -25,15 +25,18 @@ const TagsInput: React.FC<TagsInputProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const filtered = suggestions.filter(
+  const filtered = useMemo(() => {
+    return suggestions.filter(
       suggestion => 
         suggestion.toLowerCase().includes(input.toLowerCase()) && 
         !tags.includes(suggestion)
     );
+  }, [input, suggestions, tags]);
+  
+  useEffect(() => {
     setFilteredSuggestions(filtered);
     setIsDropdownOpen(input.length > 0 && filtered.length > 0);
-  }, [input, suggestions, tags]);
+  }, [filtered, input]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -48,7 +51,7 @@ const TagsInput: React.FC<TagsInputProps> = ({
     };
   }, []);
 
-  const addTag = (tag: string) => {
+  const addTag = useCallback((tag: string) => {
     if (disabled) return;
     
     const trimmedTag = tag.trim();
@@ -58,20 +61,20 @@ const TagsInput: React.FC<TagsInputProps> = ({
       setInput('');
       inputRef.current?.focus();
     }
-  };
+  }, [disabled, tags, onChange]);
 
-  const removeTag = (tagToRemove: string) => {
+  const removeTag = useCallback((tagToRemove: string) => {
     if (disabled) return;
     
     const newTags = tags.filter(tag => tag !== tagToRemove);
     onChange(newTags);
-  };
+  }, [disabled, tags, onChange]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
-  };
+  }, []);
 
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleInputKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && input) {
       e.preventDefault();
       addTag(input);
@@ -81,12 +84,45 @@ const TagsInput: React.FC<TagsInputProps> = ({
         removeTag(lastTag);
       }
     }
-  };
+  }, [input, tags, addTag, removeTag]);
 
-  const handleSuggestionClick = (suggestion: string) => {
+  const handleSuggestionClick = useCallback((suggestion: string) => {
     addTag(suggestion);
     setIsDropdownOpen(false);
-  };
+  }, [addTag]);
+
+  const renderedTags = useMemo(() => {
+    return tags.map((tag, index) => (
+      <div key={index} className="tag-item">
+        <span className="tag-text">{tag}</span>
+        {!disabled && (
+          <button
+            type="button"
+            className="tag-remove-btn"
+            onClick={() => removeTag(tag)}
+          >
+            &times;
+          </button>
+        )}
+      </div>
+    ));
+  }, [tags, disabled, removeTag]);
+
+  const renderedSuggestions = useMemo(() => {
+    return filteredSuggestions.map((suggestion, index) => (
+      <div
+        key={index}
+        className="suggestion-item"
+        onClick={() => handleSuggestionClick(suggestion)}
+      >
+        {suggestion}
+      </div>
+    ));
+  }, [filteredSuggestions, handleSuggestionClick]);
+
+  const inputPlaceholder = useMemo(() => {
+    return tags.length === 0 ? placeholder : '';
+  }, [tags.length, placeholder]);
 
   return (
     <div
@@ -95,42 +131,21 @@ const TagsInput: React.FC<TagsInputProps> = ({
     >
       <div className="tags-input-wrapper">
         <div className="tags-list">
-          {tags.map((tag, index) => (
-            <div key={index} className="tag-item">
-              <span className="tag-text">{tag}</span>
-              {!disabled && (
-                <button
-                  type="button"
-                  className="tag-remove-btn"
-                  onClick={() => removeTag(tag)}
-                >
-                  &times;
-                </button>
-              )}
-            </div>
-          ))}
+          {renderedTags}
           <input
             ref={inputRef}
             type="text"
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleInputKeyDown}
-            placeholder={tags.length === 0 ? placeholder : ''}
+            placeholder={inputPlaceholder}
             className="tag-input"
             disabled={disabled}
           />
         </div>
         {isDropdownOpen && (
           <div ref={dropdownRef} className="tags-suggestions">
-            {filteredSuggestions.map((suggestion, index) => (
-              <div
-                key={index}
-                className="suggestion-item"
-                onClick={() => handleSuggestionClick(suggestion)}
-              >
-                {suggestion}
-              </div>
-            ))}
+            {renderedSuggestions}
           </div>
         )}
       </div>
