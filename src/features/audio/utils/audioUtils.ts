@@ -33,7 +33,8 @@ export const formatAudioUrl = (audioSrc: string): string => {
         formattedUrl = `${baseUrl}/${testPath}/${audioSrc}`;
       }
     }
-  } catch (error) {
+  } catch {
+    console.warn('Failed to parse URL parameters for audio path');
   }
   
   return formattedUrl;

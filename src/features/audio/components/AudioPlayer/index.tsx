@@ -1,8 +1,8 @@
 import AudioVisualization from '../AudioVisualizer';
-import useAudioPlayer from '../../hooks/useAudioPlayer';
-import { formatTime } from '../../utils/audioUtils';
-import '../../../../styles/audio-player.scss';
-import '../../../../styles/audio-visualization.scss';
+import useAudioPlayer from '@/features/audio/hooks/useAudioPlayer';
+import { formatTime } from '@/features/audio/utils/audioUtils';
+import '@/styles/audio-player.scss';
+import '@/styles/audio-visualization.scss';
 
 interface AudioPlayerProps {
   src: string;
@@ -26,7 +26,7 @@ const AudioPlayer = ({ src, className = '', showDebug = false }: AudioPlayerProp
   return (
     <div 
       className={`custom-audio-player ${className}`} 
-      data-testid={`audio-player-${src.split('/').pop()?.split('.')[0] || 'main'}`}
+      data-testid={`audio-player-${src.split('/').pop()?.split('.')[0] ?? 'main'}`}
     >
       <audio 
         ref={audioRef}
@@ -62,7 +62,7 @@ const AudioPlayer = ({ src, className = '', showDebug = false }: AudioPlayerProp
           className={`btn btn-sm ${playing ? 'btn-danger' : 'btn-primary'}`}
           onClick={togglePlay}
           disabled={!loaded && !error}
-          data-testid={playing ? `pause-button-${src.split('/').pop()?.split('.')[0] || 'main'}` : `play-button-${src.split('/').pop()?.split('.')[0] || 'main'}`}
+          data-testid={playing ? `pause-button-${src.split('/').pop()?.split('.')[0] ?? 'main'}` : `play-button-${src.split('/').pop()?.split('.')[0] ?? 'main'}`}
           aria-label={playing ? 'Pause' : 'Play'}
         >
           {!loaded && !error ? (
@@ -90,7 +90,7 @@ const AudioPlayer = ({ src, className = '', showDebug = false }: AudioPlayerProp
           duration={duration}
           currentTime={currentTime}
           className={className.includes('compact') ? 'audio-visualization--compact' : ''}
-          data-testid={`audio-progress-${src.split('/').pop()?.split('.')[0] || 'main'}`}
+          data-testid={`audio-progress-${src.split('/').pop()?.split('.')[0] ?? 'main'}`}
         />
       )}
       

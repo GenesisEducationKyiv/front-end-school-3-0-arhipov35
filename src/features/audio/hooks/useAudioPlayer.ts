@@ -31,12 +31,12 @@ export const useAudioPlayer = (src: string): AudioPlayerHook => {
   const prevSrcRef = useRef<string>(formattedSrc);
   
   useEffect(() => {
-    // Якщо URL не змінився, не скидаємо стан
+    
     if (prevSrcRef.current === formattedSrc) {
       return;
     }
     
-    // Зберігаємо поточний стан відтворення
+    
     const wasPlaying = state.playing;
     prevSrcRef.current = formattedSrc;
     
@@ -44,19 +44,20 @@ export const useAudioPlayer = (src: string): AudioPlayerHook => {
       ...prev,
       error: null,
       loaded: false,
-      // Зберігаємо стан відтворення, якщо URL не змінився значно
       playing: false,
       duration: 0,
       currentTime: 0,
       audioInfo: `Loading: ${formattedSrc}`
     }));
     
-    // Якщо аудіо відтворювалось, автоматично продовжуємо відтворення після завантаження
+    
     if (wasPlaying) {
       const audio = audioRef.current;
       if (audio) {
         const playWhenReady = () => {
-          audio.play().catch(() => {});
+          audio.play().catch(() => {
+            console.debug('Auto-play was prevented');
+          });
         };
         audio.addEventListener('canplay', playWhenReady, { once: true });
         return () => audio.removeEventListener('canplay', playWhenReady);
@@ -157,7 +158,7 @@ export const useAudioPlayer = (src: string): AudioPlayerHook => {
               error: null
             }));
           })
-          .catch(err => {
+          .catch((err: Error) => {
             setState(prev => ({
               ...prev,
               error: `Playback failed: ${err.message}`

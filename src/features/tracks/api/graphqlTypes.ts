@@ -17,10 +17,10 @@ export interface TrackFileUploadResult {
   message: string;
 }
 
-export type GraphQLQuery = {
+export interface GraphQLQuery {
   document: string;
   variables: Record<string, unknown>;
-};
+}
 
 export interface QueryResult<T> {
   data?: T;

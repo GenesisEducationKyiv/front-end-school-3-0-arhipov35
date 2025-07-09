@@ -26,7 +26,7 @@ const Pagination = ({
           </button>
         </li>
         
-        {[...Array(totalPages)].map((_, index) => (
+        {Array.from({ length: totalPages }).map((_, index) => (
           <li key={index} className={`page-item ${page === index + 1 ? 'active' : ''}`}>
             <button 
               className="page-link" 

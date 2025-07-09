@@ -5,14 +5,16 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  { ignores: ['dist', 'playwright/.cache/**', 'playwright-report/**', 'test-results/**'] },
   {
+    // Основна конфігурація для файлів проекту
     extends: [
       js.configs.recommended,
       ...tseslint.configs.recommendedTypeChecked, 
       ...tseslint.configs.stylisticTypeChecked, 
     ],
     files: ['**/*.{ts,tsx}'],
+    ignores: ['playwright*.config.ts', 'playwright/**/*.ts'],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
@@ -39,6 +41,20 @@ export default tseslint.config(
     extends: [js.configs.recommended],
     languageOptions: {
       globals: globals.node,
+    },
+  },
+  {
+    // Окрема конфігурація для файлів Playwright без перевірки типів
+    files: ['playwright*.config.ts', 'playwright/**/*.ts'],
+    extends: [
+      js.configs.recommended,
+      ...tseslint.configs.recommended, // Без перевірки типів
+    ],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.browser,
+      },
     },
   }
 )
