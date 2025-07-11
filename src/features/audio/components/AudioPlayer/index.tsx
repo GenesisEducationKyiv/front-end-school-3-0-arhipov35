@@ -37,21 +37,17 @@ const AudioPlayer = ({ src, className = '', showDebug = false }: AudioPlayerProp
       
       {(showDebug || error) && (
         <div className="player-debug">
-          {showDebug && audioInfo && audioInfo}
+          {showDebug && audioInfo && <span>{audioInfo}</span>}
           {error && (
-            <>
-              <br />
-              <strong>Debug Info:</strong><br />
-              Original URL: {src}<br />
-              Formatted URL: {formattedSrc}
-              <br />
-              <strong>Варіанти виправлення:</strong><br />
-              1. Спробуйте відкрити <a href={formattedSrc} target="_blank" rel="noopener noreferrer">файл напряму</a> щоб перевірити посилання.<br />
-              2. Протестуйте різні шляхи через параметр URL, наприклад:<br />
-              <code>?audioPath=api/tracks/file</code> або <code>?audioPath=uploads</code><br />
-              3. Перевірте чи правильно налаштований сервер для віддачі статичних файлів.<br />
-              4. Подивіться в консолі мережеві запити, щоб побачити точний шлях до файлу.
-            </>
+            <details>
+              <summary>Debug Info</summary>
+              <small>
+                <div>URL: {formattedSrc}</div>
+                <div>
+                  <a href={formattedSrc} target="_blank" rel="noopener noreferrer">Відкрити файл</a>
+                </div>
+              </small>
+            </details>
           )}
         </div>
       )}

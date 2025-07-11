@@ -31,6 +31,10 @@ export const apiSlice = createApi({
     url: import.meta.env.VITE_API_URL as string,
   }),
   tagTypes: ["Track", "Genre"],
+  keepUnusedDataFor: 600, 
+  refetchOnMountOrArgChange: false, 
+  refetchOnFocus: false, 
+  refetchOnReconnect: false, 
   endpoints: (builder) => ({
     getTracks: builder.query<TrackListResponse, TrackFilters | undefined>({
       query: (filters) => ({

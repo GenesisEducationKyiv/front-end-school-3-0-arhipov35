@@ -16,7 +16,6 @@
     "@mobily/ts-belt": "^3.13.1",
     "@reduxjs/toolkit": "^2.7.0",
     "@rtk-query/graphql-request-base-query": "^2.3.1",
-    "bootstrap": "^5.3.5",
     "graphql": "^16.11.0",
     "graphql-request": "^7.2.0",
     "neverthrow": "^8.2.0",
@@ -46,7 +45,6 @@
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.26.1",
     "vite": "^6.3.1",
-    "vitest": "^3.2.4",
-    "wait-on": "^8.0.3"
+    "vitest": "^3.2.4"
   }
 }

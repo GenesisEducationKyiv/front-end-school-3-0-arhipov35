@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import '@/styles/audio-visualization.scss';
 
 declare global {
@@ -62,6 +62,52 @@ const AudioVisualization = ({
     }
   }, [loaded, audioRef]);
 
+  const drawVisualization = useCallback((canvasCtx: CanvasRenderingContext2D, rect: DOMRect, isPlaying: boolean) => {
+    if (!analyser || !dataArray) return;
+    
+    analyser.getByteFrequencyData(dataArray);
+    canvasCtx.clearRect(0, 0, rect.width, rect.height);
+    
+    const barWidth = rect.width / (dataArray.length / 2);
+    let x = 0;
+    
+    const gradient = canvasCtx.createLinearGradient(0, 0, 0, rect.height);
+    gradient.addColorStop(0, isPlaying ? '#0d6efd' : '#6c757d');
+    gradient.addColorStop(1, isPlaying ? '#0a58ca' : '#5a6268');
+    canvasCtx.fillStyle = gradient;
+    
+    const heightMultiplier = isPlaying ? 0.8 : 0.7;
+    
+    for (let i = 0; i < dataArray.length / 2; i++) {
+      const value = dataArray[i] ?? 0;
+      const barHeight = (value / 255) * rect.height * heightMultiplier;
+      const y = (rect.height - barHeight) / 2;
+      canvasCtx.fillRect(x, y, barWidth - 1, barHeight);
+      x += barWidth;
+    }
+  }, [analyser, dataArray]);
+
+  const animate = useCallback(() => {
+    if (!canvasRef.current) return;
+    
+    const canvas = canvasRef.current;
+    const canvasCtx = canvas.getContext('2d');
+    if (!canvasCtx) return;
+    
+    const draw = () => {
+      animationFrameRef.current = requestAnimationFrame(draw);
+      drawVisualization(canvasCtx, canvas.getBoundingClientRect(), playing);
+    };
+    
+    draw();
+    
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [drawVisualization, playing]);
+
   useEffect(() => {
     if (!analyser || !dataArray || !canvasRef.current) return;
 
@@ -75,59 +121,12 @@ const AudioVisualization = ({
     canvas.height = rect.height * dpr;
     canvasCtx.scale(dpr, dpr);
 
-    const draw = () => {
-      if (!analyser || !dataArray) return;
-
-      animationFrameRef.current = requestAnimationFrame(draw);
-
-      analyser.getByteFrequencyData(dataArray);
-
-      canvasCtx.clearRect(0, 0, rect.width, rect.height);
-
-      const barWidth = rect.width / (dataArray.length / 2);
-      let x = 0;
-
-      const gradient = canvasCtx.createLinearGradient(0, 0, 0, rect.height);
-      gradient.addColorStop(0, playing ? '#0d6efd' : '#6c757d');
-      gradient.addColorStop(1, playing ? '#0a58ca' : '#5a6268');
-      canvasCtx.fillStyle = gradient;
-
-      for (let i = 0; i < dataArray.length / 2; i++) {
-
-        const value = dataArray[i] ?? 0;
-        const barHeight = (value / 255) * rect.height * 0.8;
-
-        const y = (rect.height - barHeight) / 2;
-
-        canvasCtx.fillRect(x, y, barWidth - 1, barHeight);
-
-        x += barWidth;
-      }
-    };
-
     if (playing) {
-      draw();
+      const cleanup = animate();
+      return cleanup;
     } else if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
-
-      analyser.getByteFrequencyData(dataArray);
-      canvasCtx.clearRect(0, 0, rect.width, rect.height);
-
-      const barWidth = rect.width / (dataArray.length / 2);
-      let x = 0;
-
-      const gradient = canvasCtx.createLinearGradient(0, 0, 0, rect.height);
-      gradient.addColorStop(0, '#6c757d');
-      gradient.addColorStop(1, '#5a6268');
-      canvasCtx.fillStyle = gradient;
-
-      for (let i = 0; i < dataArray.length / 2; i++) {
-        const value = dataArray[i] ?? 0;
-        const barHeight = (value / 255) * rect.height * 0.7;
-        const y = (rect.height - barHeight) / 2;
-        canvasCtx.fillRect(x, y, barWidth - 1, barHeight);
-        x += barWidth;
-      }
+      drawVisualization(canvasCtx, rect, false);
     }
 
     return () => {
@@ -135,27 +134,32 @@ const AudioVisualization = ({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [analyser, dataArray, playing, canvasRef]);
+  }, [analyser, dataArray, playing, canvasRef, animate, drawVisualization]);
 
-  const progressPercentage = loaded && duration > 0 ? (currentTime / duration) * 100 : 0;
+  const progressPercentage = useMemo(() => {
+    return loaded && duration > 0 ? (currentTime / duration) * 100 : 0;
+  }, [loaded, duration, currentTime]);
+  
+  const containerClassName = useMemo(() => {
+    return `audio-visualization ${playing ? 'audio-visualization--playing' : ''} ${className}`;
+  }, [playing, className]);
+  
+  const placeholderText = useMemo(() => {
+    return playing ? 'Loading visualization...' : 'Visualization will appear when audio is played';
+  }, [playing]);
 
   return (
-    <div className={`audio-visualization ${playing ? 'audio-visualization--playing' : ''} ${className}`}>
+    <div className={containerClassName}>
       {loaded ? (
         <>
-          <canvas
-            ref={canvasRef}
-            className="audio-visualization__canvas"
-          ></canvas>
-          <div
-            className="audio-visualization__progress"
+          <canvas ref={canvasRef} className="audio-visualization__canvas"></canvas>
+          <div 
+            className="audio-visualization__progress" 
             style={{ width: `${progressPercentage}%` }}
           ></div>
         </>
       ) : (
-        <div className="audio-visualization__placeholder">
-          {playing ? 'Loading visualization...' : 'Visualization will appear when audio is played'}
-        </div>
+        <div className="audio-visualization__placeholder">{placeholderText}</div>
       )}
     </div>
   );
