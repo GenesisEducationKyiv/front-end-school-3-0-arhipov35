@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface ActionBarProps {
   isBulkSelectEnabled: boolean;
   selectedTrackIds: string[];
@@ -8,7 +6,7 @@ interface ActionBarProps {
   onBulkDeleteClick: () => void;
 }
 
-const ActionBar = React.memo(({ isBulkSelectEnabled, selectedTrackIds, toggleBulkSelect, onCreateClick, onBulkDeleteClick }: ActionBarProps) => (
+const ActionBar = ({ isBulkSelectEnabled, selectedTrackIds, toggleBulkSelect, onCreateClick, onBulkDeleteClick }: ActionBarProps) => (
   <div className="d-flex justify-content-between align-items-center mb-4">
     <h1 data-testid="tracks-header">Tracks</h1>
     <div className="button-group d-flex gap-2">
@@ -39,6 +37,6 @@ const ActionBar = React.memo(({ isBulkSelectEnabled, selectedTrackIds, toggleBul
       </button>
     </div>
   </div>
-));
+);
 
 export default ActionBar;

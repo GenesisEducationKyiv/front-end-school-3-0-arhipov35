@@ -39,16 +39,10 @@ const TrackItem = ({
   ), [track.genres]);
   
  
-  const coverImageSrc = useMemo(() => 
-    track.coverImage || getDefaultCoverImage(), 
-    [track.coverImage, getDefaultCoverImage]
-  );
+  const coverImageSrc = track.coverImage || getDefaultCoverImage();
   
   
-  const uploadButtonText = useMemo(() => 
-    track.audioFile ? 'Change Audio' : 'Upload Audio', 
-    [track.audioFile]
-  );
+  const uploadButtonText = track.audioFile ? 'Change Audio' : 'Upload Audio';
   
   return (
     <tr data-testid={`track-item-${track.id}`}>
@@ -131,9 +125,7 @@ const TrackItem = ({
   );
 };
 
-// Мемоізуємо компонент TrackItem для запобігання зайвих перерендерів
 export default React.memo(TrackItem, (prevProps, nextProps) => {
-  // Порівнюємо всі важливі пропси для визначення необхідності перерендеру
   return (
     prevProps.track.id === nextProps.track.id &&
     prevProps.track.title === nextProps.track.title &&

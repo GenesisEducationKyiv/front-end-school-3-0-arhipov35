@@ -31,10 +31,7 @@ const TrackTable = ({
     [tracks.length, selectedTrackIds.length]
   );
   
-  const actionColumnWidth = useMemo(() => 
-    ({ width: isBulkSelectEnabled ? '100px' : '140px' }),
-    [isBulkSelectEnabled]
-  );
+  const actionColumnWidth = { width: isBulkSelectEnabled ? '100px' : '140px' };
   
   const isTrackSelected = useCallback(
     (trackId: string) => selectedTrackIds.includes(trackId),
