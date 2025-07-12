@@ -1,9 +1,9 @@
 import React, { useMemo, useCallback } from 'react';
 import { Track } from '@/types/track';
-import TrackItem from './TrackItem';
-import '@/styles/track-list.scss';
+import TrackCard from './TrackCard';
+import '@/styles/track-card-grid.scss';
 
-interface TrackTableProps {
+interface TrackCardGridProps {
   tracks: Track[];
   isBulkSelectEnabled: boolean;
   selectedTrackIds: string[];
@@ -15,7 +15,7 @@ interface TrackTableProps {
   getDefaultCoverImage: () => string;
 }
 
-const TrackTable = ({
+const TrackCardGrid = ({
   tracks,
   isBulkSelectEnabled,
   selectedTrackIds,
@@ -25,22 +25,20 @@ const TrackTable = ({
   onDeleteClick,
   onUploadClick,
   getDefaultCoverImage
-}: TrackTableProps) => {
+}: TrackCardGridProps) => {
   const allSelected = useMemo(() => 
     tracks.length > 0 && selectedTrackIds.length === tracks.length,
     [tracks.length, selectedTrackIds.length]
   );
-  
-  const actionColumnWidth = { width: isBulkSelectEnabled ? '100px' : '140px' };
   
   const isTrackSelected = useCallback(
     (trackId: string) => selectedTrackIds.includes(trackId),
     [selectedTrackIds]
   );
   
-  const trackItems = useMemo(() => {
+  const trackCards = useMemo(() => {
     return tracks.map((track) => (
-      <TrackItem
+      <TrackCard
         key={track.id}
         track={track}
         isBulkSelectEnabled={isBulkSelectEnabled}
@@ -53,48 +51,34 @@ const TrackTable = ({
       />
     ));
   }, [tracks, isBulkSelectEnabled, isTrackSelected, toggleSelectTrack, onEditClick, onDeleteClick, onUploadClick, getDefaultCoverImage]);
-  
-  const tableHeader = useMemo(() => (
-    <thead>
-      <tr>
-        {isBulkSelectEnabled && (
-          <th style={{ width: '40px' }}>
-            <div className="form-check">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                checked={allSelected}
-                onChange={toggleSelectAll}
-                id="selectAllCheckbox"
-                data-testid="select-all"
-              />
-            </div>
-          </th>
-        )}
-        <th style={{ width: '70px' }}>Cover</th>
-        <th>Title</th>
-        <th>Artist</th>
-        <th>Album</th>
-        <th>Genres</th>
-        <th style={{ width: '120px' }}>Audio</th>
-        <th style={actionColumnWidth}>Actions</th>
-      </tr>
-    </thead>
-  ), [isBulkSelectEnabled, allSelected, toggleSelectAll, actionColumnWidth]);
 
   return (
-    <div className="table-responsive">
-      <table className="table table-hover">
-        {tableHeader}
-        <tbody>
-          {trackItems}
-        </tbody>
-      </table>
+    <div className="track-card-grid__container">
+      {isBulkSelectEnabled && (
+        <div className="track-card-grid__select-all mb-3">
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              checked={allSelected}
+              onChange={toggleSelectAll}
+              id="selectAllCheckbox"
+              data-testid="select-all"
+            />
+            <label className="form-check-label" htmlFor="selectAllCheckbox">
+              Select All Tracks
+            </label>
+          </div>
+        </div>
+      )}
+      <div className="track-card-grid__row row">
+        {trackCards}
+      </div>
     </div>
   );
 };
 
-export default React.memo(TrackTable, (prevProps, nextProps) => {
+export default React.memo(TrackCardGrid, (prevProps, nextProps) => {
   if (prevProps.tracks.length !== nextProps.tracks.length) return false;
   if (prevProps.isBulkSelectEnabled !== nextProps.isBulkSelectEnabled) return false;
   if (prevProps.selectedTrackIds.length !== nextProps.selectedTrackIds.length) return false;

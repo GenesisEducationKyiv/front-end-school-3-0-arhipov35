@@ -1,3 +1,6 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
+import storybook from "eslint-plugin-storybook";
+
 import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
@@ -5,7 +8,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist', 'playwright/.cache/**', 'playwright-report/**', 'test-results/**'] },
+  { ignores: ['dist', '.storybook/**', 'playwright/.cache/**', 'playwright-report/**', 'test-results/**'] },
   {
     // Основна конфігурація для файлів проекту
     extends: [
@@ -56,5 +59,6 @@ export default tseslint.config(
         ...globals.browser,
       },
     },
-  }
-)
+  },
+  storybook.configs["flat/recommended"]
+);
