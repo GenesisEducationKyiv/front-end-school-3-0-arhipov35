@@ -11,7 +11,7 @@ import "@/styles/track-form.scss";
 import { ResultAsync } from "neverthrow";
 import { validateForm, FormData, FormErrors } from "@/features/tracks/utils/validateForm";
 import { toError } from "@/features/tracks/utils/toError";
-
+import { Input } from "@/stories/input/Input";
 
 interface TrackFormProps {
   track?: Track;
@@ -34,10 +34,9 @@ const TrackForm = ({ track, onClose }: TrackFormProps) => {
   const isSubmitting = isCreating || isUpdating;
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    name: string,
+    value: string
   ) => {
-    const { name, value } = e.target;
-
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -67,7 +66,6 @@ const TrackForm = ({ track, onClose }: TrackFormProps) => {
       setErrors(validationResult.error);
       return;
     }
-    //Instead of ts-belt’s Either, I used neverthrow.Result because they serve the same purpose for demonstrating monads.
     const validatedData = validationResult.value;
 
     const actionPromise = track
@@ -95,72 +93,40 @@ const TrackForm = ({ track, onClose }: TrackFormProps) => {
       data-testid="track-form"
     >
       <div className="mb-3">
-        <label htmlFor="title" className="form-label">
-          Title *
-        </label>
-        <input
-          type="text"
-          className={`form-control ${errors.title ? "is-invalid" : ""}`}
-          id="title"
-          name="title"
-          value={formData.title}
-          onChange={handleInputChange}
-          disabled={isSubmitting}
-          aria-disabled={isSubmitting ? "true" : "false"}
-          data-loading={isSubmitting ? "true" : "false"}
+        <Input
+          label="Title *"
+          defaultValue={formData.title}
+          onChange={(value) => handleInputChange("title", value)}
+          error={!!errors.title}
+          supportingText={errors.title ?? "Enter track title"}
           data-testid="input-title"
         />
-        {errors.title && (
-          <div className="invalid-feedback" data-testid="error-title">
-            {errors.title}
-          </div>
-        )}
       </div>
 
       <div className="mb-3">
-        <label htmlFor="artist" className="form-label">
-          Artist *
-        </label>
-        <input
-          type="text"
-          className={`form-control ${errors.artist ? "is-invalid" : ""}`}
-          id="artist"
-          name="artist"
-          value={formData.artist}
-          onChange={handleInputChange}
-          disabled={isSubmitting}
-          aria-disabled={isSubmitting ? "true" : "false"}
-          data-loading={isSubmitting ? "true" : "false"}
+        <Input
+          label="Artist *"
+          defaultValue={formData.artist}
+          onChange={(value) => handleInputChange("artist", value)}
+          error={!!errors.artist}
+          supportingText={errors.artist ?? "Enter artist name"}
           data-testid="input-artist"
         />
-        {errors.artist && (
-          <div className="invalid-feedback" data-testid="error-artist">
-            {errors.artist}
-          </div>
-        )}
       </div>
 
       <div className="mb-3">
-        <label htmlFor="album" className="form-label">
-          Album
-        </label>
-        <input
-          type="text"
-          className="form-control"
-          id="album"
-          name="album"
-          value={formData.album}
-          onChange={handleInputChange}
-          disabled={isSubmitting}
-          aria-disabled={isSubmitting ? "true" : "false"}
-          data-loading={isSubmitting ? "true" : "false"}
+        <Input
+          label="Album"
+          defaultValue={formData.album}
+          onChange={(value) => handleInputChange("album", value)}
           data-testid="input-album"
+          supportingText={"Enter album name"}
         />
       </div>
 
       <div className="mb-3">
         <label htmlFor="genres" className="form-label">
-          Genres *
+          Genres
         </label>
         <TagsInput
           tags={formData.genres}
@@ -171,35 +137,18 @@ const TrackForm = ({ track, onClose }: TrackFormProps) => {
           error={errors.genres}
           data-testid="genre-selector"
         />
-        {errors.genres && (
-          <div className="invalid-feedback d-block" data-testid="error-genre">
-            {errors.genres}
-          </div>
-        )}
       </div>
 
       <div className="mb-3">
-        <label htmlFor="coverImage" className="form-label">
-          Cover Image URL
-        </label>
-        <input
-          type="text"
-          className={`form-control ${errors.coverImage ? "is-invalid" : ""}`}
-          id="coverImage"
-          name="coverImage"
-          value={formData.coverImage}
-          onChange={handleInputChange}
+        <Input
+          label="Cover Image URL"
+          defaultValue={formData.coverImage}
+          onChange={(value) => handleInputChange("coverImage", value)}
           placeholder="https://example.com/image.jpg"
-          disabled={isSubmitting}
-          aria-disabled={isSubmitting ? "true" : "false"}
-          data-loading={isSubmitting ? "true" : "false"}
+          error={!!errors.coverImage}
+          supportingText={errors.coverImage ?? "Enter cover image URL"}
           data-testid="input-cover-image"
         />
-        {errors.coverImage && (
-          <div className="invalid-feedback" data-testid="error-cover-image">
-            {errors.coverImage}
-          </div>
-        )}
 
         {formData.coverImage && (
           <div className="cover-preview mt-2">

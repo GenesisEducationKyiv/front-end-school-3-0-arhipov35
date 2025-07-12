@@ -1,3 +1,5 @@
+import { Button } from '@/stories/Button/Button';
+
 interface ActionBarProps {
   isBulkSelectEnabled: boolean;
   selectedTrackIds: string[];
@@ -28,13 +30,13 @@ const ActionBar = ({ isBulkSelectEnabled, selectedTrackIds, toggleBulkSelect, on
       >
         {isBulkSelectEnabled ? 'Cancel Selection' : 'Select Multiple'}
       </button>
-      <button 
-        className="btn btn-primary" 
+      <Button 
+        primary
+        size="medium"
+        label="Create Track"
         onClick={onCreateClick}
         data-testid="create-track-button"
-      >
-        Create Track
-      </button>
+      />
     </div>
   </div>
 );

@@ -10,7 +10,7 @@ import '@/styles/delete-confirmation.scss';
 import '@/styles/audio-player.scss';
 import FilterBar from './components/FilterBar';
 import ActionBar from './components/ActionBar';
-import TrackTable from './components/TrackTable';
+import TrackCardGrid from './components/TrackCardGrid';
 import Pagination from './components/Pagination';
 
 const TrackForm = lazy(() => import('@/features/tracks/components/TrackForm'));
@@ -137,7 +137,7 @@ const TrackList = () => {
         <div className="empty-state"><p>No tracks found. Create your first track!</p></div>
       ) : (
         <>
-          <TrackTable
+          <TrackCardGrid
             tracks={memoizedTracks}
             isBulkSelectEnabled={isBulkSelectEnabled}
             selectedTrackIds={selectedTrackIds}
@@ -175,7 +175,7 @@ const TrackList = () => {
         )}
       </Modal>
 
-      <Suspense fallback={<Loader text="Loading..." />}>
+      <Suspense fallback={<div className="loading"></div>}>
         <DeleteTrackModal
           isOpen={isDeleteModalOpen}
           onClose={handleDeleteModalClose}
@@ -184,7 +184,7 @@ const TrackList = () => {
         />
       </Suspense>
 
-      <Suspense fallback={<Loader text="Loading..." />}>
+      <Suspense fallback={<div className="loading"></div>}>
         <BulkDeleteModal
           isOpen={isBulkDeleteModalOpen}
           onClose={handleBulkDeleteModalClose}

@@ -1,0 +1,49 @@
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.track-card-grid {
+  
+  &__container {
+    margin-top: 20px;
+    
+    
+    @media (max-width: 576px) {
+      margin-top: 10px;
+    }
+  }
+  
+  
+  &__select-all {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    
+    .form-check-input {
+      margin-right: 8px;
+    }
+  }
+  
+  &__empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+  
+  &__row {
+    > div {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+  }
+}
