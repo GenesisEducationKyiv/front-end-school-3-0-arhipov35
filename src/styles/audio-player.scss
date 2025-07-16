@@ -1,0 +1,149 @@
+.custom-audio-player {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: 0.5rem 0;
+  background: linear-gradient(to right, #f1f5f9, #f8fafc);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  
+  &--compact {
+    flex-direction: row;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .player-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    
+    .btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      flex-shrink: 0;
+      border: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease;
+      
+      &:hover {
+        transform: scale(1.05);
+      }
+      
+      &:active {
+        transform: scale(0.95);
+      }
+      
+      &.btn-primary {
+        background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+      }
+      
+      &.btn-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      }
+      
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+      
+      i {
+        font-size: 1.25rem;
+      }
+    }
+    
+    .time-display {
+      color: #64748b;
+      font-size: 0.8rem;
+      font-weight: 500;
+      flex-shrink: 0;
+      min-width: 80px;
+    }
+    
+    .form-range {
+      height: 6px;
+      cursor: pointer;
+      flex-grow: 1;
+      
+      &::-webkit-slider-thumb {
+        background: #6366f1;
+        width: 14px;
+        height: 14px;
+        cursor: pointer;
+      }
+      
+      &::-webkit-slider-runnable-track {
+        background: #e2e8f0;
+        height: 6px;
+        border-radius: 999px;
+      }
+    }
+  }
+  
+  .player-error {
+    color: #ef4444;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background-color: rgba(239, 68, 68, 0.1);
+    border-radius: 0.25rem;
+  }
+  
+  .player-debug {
+    color: #64748b;
+    font-size: 0.7rem;
+    margin-top: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background-color: #f1f5f9;
+    border-radius: 0.25rem;
+    word-break: break-all;
+  }
+}
+
+// Compact version in track list
+.track-audio-cell {
+  .custom-audio-player {
+    margin: 0;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    
+    .player-controls {
+      gap: 0.5rem;
+      
+      .btn {
+        width: 32px;
+        height: 32px;
+        
+        i {
+          font-size: 1rem;
+        }
+      }
+      
+      .time-display {
+        min-width: 60px;
+        font-size: 0.75rem;
+      }
+      
+      .form-range {
+        height: 4px;
+        max-width: 120px;
+        
+        &::-webkit-slider-thumb {
+          width: 12px;
+          height: 12px;
+        }
+      }
+    }
+  }
+}
