@@ -1,3 +1,4 @@
+import React, { useCallback, useMemo } from 'react';
 import AudioPlayer from '@/features/audio/components/AudioPlayer';
 import { Track } from '@/types/track';
 
@@ -22,6 +23,27 @@ const TrackItem = ({
   onUploadClick,
   getDefaultCoverImage
 }: TrackItemProps) => {
+  const handleToggleSelect = useCallback(() => toggleSelectTrack(track.id), [toggleSelectTrack, track.id]);
+  const handleEditClick = useCallback(() => onEditClick(track), [onEditClick, track]);
+  const handleDeleteClick = useCallback(() => onDeleteClick(track.id), [onDeleteClick, track.id]);
+  const handleUploadClick = useCallback(() => onUploadClick(track), [onUploadClick, track]);
+  
+  const handleImageError = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    (e.target as HTMLImageElement).src = getDefaultCoverImage();
+  }, [getDefaultCoverImage]);
+  
+  const genreTags = useMemo(() => (
+    track.genres.map((genre: string, index: number) => (
+      <span key={index} className="genre-tag">{genre}</span>
+    ))
+  ), [track.genres]);
+  
+ 
+  const coverImageSrc = track.coverImage || getDefaultCoverImage();
+  
+  
+  const uploadButtonText = track.audioFile ? 'Change Audio' : 'Upload Audio';
+  
   return (
     <tr data-testid={`track-item-${track.id}`}>
       {isBulkSelectEnabled && (
@@ -31,7 +53,7 @@ const TrackItem = ({
               className="form-check-input"
               type="checkbox"
               checked={isSelected}
-              onChange={() => toggleSelectTrack(track.id)}
+              onChange={handleToggleSelect}
               id={`checkbox-${track.id}`}
               data-testid={`track-checkbox-${track.id}`}
             />
@@ -40,25 +62,17 @@ const TrackItem = ({
       )}
       <td>
         <img 
-          src={track.coverImage || getDefaultCoverImage()} 
+          src={coverImageSrc} 
           alt={track.title}
           className="track-cover-thumbnail"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = getDefaultCoverImage();
-          }}
+          onError={handleImageError}
         />
       </td>
       <td data-testid={`track-item-${track.id}-title`}>{track.title}</td>
       <td data-testid={`track-item-${track.id}-artist`}>{track.artist}</td>
       <td>{track.album || '-'}</td>
       <td>
-        <div className="track-genres">
-          {track.genres.map((genre: string, index: number) => (
-            <span key={index} className="genre-tag">
-              {genre}
-            </span>
-          ))}
-        </div>
+        <div className="track-genres">{genreTags}</div>
       </td>
       <td className="track-audio-cell">
         {track.audioFile ? (
@@ -70,7 +84,7 @@ const TrackItem = ({
         ) : (
           <button 
             className="btn btn-sm btn-outline-primary"
-            onClick={() => onUploadClick(track)}
+            onClick={handleUploadClick}
             data-testid={`upload-button-${track.id}`}
           >
             Upload Audio
@@ -81,7 +95,7 @@ const TrackItem = ({
         <div className="btn-group btn-group-sm">
           <button 
             className="btn btn-sm btn-outline-primary" 
-            onClick={() => onEditClick(track)}
+            onClick={handleEditClick}
             title="Edit track"
             data-testid={`edit-track-${track.id}`}
           >
@@ -89,16 +103,16 @@ const TrackItem = ({
           </button>
           <button 
             className="btn btn-sm btn-outline-info" 
-            onClick={() => onUploadClick(track)}
+            onClick={handleUploadClick}
             title="Upload audio file"
             data-testid={`upload-track-${track.id}`}
           >
-            {track.audioFile ? 'Change Audio' : 'Upload Audio'}
+            {uploadButtonText}
           </button>
           {!isBulkSelectEnabled && (
             <button 
               className="btn btn-sm btn-outline-danger"
-              onClick={() => onDeleteClick(track.id)}
+              onClick={handleDeleteClick}
               title="Delete track"
               data-testid={`delete-track-${track.id}`}
             >
@@ -111,4 +125,16 @@ const TrackItem = ({
   );
 };
 
-export default TrackItem;
+export default React.memo(TrackItem, (prevProps, nextProps) => {
+  return (
+    prevProps.track.id === nextProps.track.id &&
+    prevProps.track.title === nextProps.track.title &&
+    prevProps.track.artist === nextProps.track.artist &&
+    prevProps.track.album === nextProps.track.album &&
+    prevProps.track.coverImage === nextProps.track.coverImage &&
+    prevProps.track.audioFile === nextProps.track.audioFile &&
+    JSON.stringify(prevProps.track.genres) === JSON.stringify(nextProps.track.genres) &&
+    prevProps.isBulkSelectEnabled === nextProps.isBulkSelectEnabled &&
+    prevProps.isSelected === nextProps.isSelected
+  );
+});

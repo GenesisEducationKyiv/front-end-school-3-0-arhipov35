@@ -11,7 +11,21 @@ export default defineConfig({
     },
   },
   build: {
-    sourcemap: true,
+    sourcemap: false,
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    },
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          redux: ['@reduxjs/toolkit', 'react-redux']
+        }
+      }
+    }
   },
   test: {
     globals: true,
